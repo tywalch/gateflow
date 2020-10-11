@@ -1,5 +1,5 @@
 # GateFlow
-
+[![Coverage Status](https://coveralls.io/repos/github/tywalch/gateflow/badge.svg?branch=main)](https://coveralls.io/github/tywalch/gateflow?branch=main)
 ![GateFlow](https://github.com/tywalch/gateflow/blob/main/assets/gateflow.png?raw=true)
 
 ***GateFlow*** is a light weight library to manage state and enforce order for flows that span multiple multi-requests.  
