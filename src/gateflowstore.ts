@@ -38,6 +38,7 @@ export class GateFlowStore {
       try {
         let {privateKey, publicKey} = await this.getPublicPrivateKey();
         this.store.set(privateKey, value, "EX", this.ttl, (err, data) => {
+          /* istanbul ignore if */
           if (err) {
             return reject(err)
           }
@@ -54,6 +55,7 @@ export class GateFlowStore {
       try {
         let privateKey = await this.getPrivateKey(publicKey);
         this.store.set(privateKey, value, "EX", this.ttl, (err, data) => {
+          /* istanbul ignore if */
           if (err) {
             return reject(err);
           }
@@ -70,6 +72,7 @@ export class GateFlowStore {
       try {
         let privateKey = await this.getPrivateKey(publicKey);
         this.store.get(privateKey, (err, data) => {
+          /* istanbul ignore if */
           if (err) {
             reject(err);
           }
@@ -87,6 +90,7 @@ export class GateFlowStore {
       try {
         let privateKey = await this.getPrivateKey(publicKey);
         this.store.del(privateKey, (err, data) => {
+          /* istanbul ignore if */
           if (err) {
             return reject(err)
           } else {

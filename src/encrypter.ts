@@ -13,6 +13,7 @@ export class Encrypter {
   public async random(length = 48): Promise<string> {
     return new Promise((resolve, reject) => {
       crypto.randomBytes(length, function(err, buf) {
+        /* istanbul ignore if */
         if (err) {
           reject(err);
         }
