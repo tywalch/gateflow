@@ -8,7 +8,7 @@ export interface Store {
   quit: () => void;
 }
 
-export default class GateFlowStore {
+export class GateFlowStore {
   public ttl: number;
   public store: Store;
   private encrypter: Encrypter;

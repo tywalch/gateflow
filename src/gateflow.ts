@@ -1,7 +1,7 @@
-import GateKeeper, {FlowSchema} from "./gatekeeper";
-import GateFlowStore from "./gateflowstore";
+import {GateKeeper, FlowSchema} from "./gatekeeper";
+import {GateFlowStore} from "./gateflowstore";
 
-export default class GateFlow<K extends string, V extends K> {
+export class GateFlow<K extends string, V extends K> {
   private store: GateFlowStore;
   private schema: FlowSchema<K, V>;
   

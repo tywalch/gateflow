@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 import redis from "redis";
 import RedisClientMock from "./mock/redis";
-import GateFlowStore from "../src/gateflowstore";
-import GateFlow from "../src/gateflow";
+import {GateFlowStore} from "../src/gateflowstore";
+import {GateFlow} from "../src/gateflow";
 const client = new RedisClientMock();
 const store = new GateFlowStore(client, "apples", 99999999);
 const schema = GateFlow.buildSchema([

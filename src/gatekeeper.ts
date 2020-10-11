@@ -1,4 +1,4 @@
-import GateFlowStore from "./gateflowstore";
+import {GateFlowStore} from "./gateflowstore";
 
 export type FlowSchema<K extends string, V extends K> = [K, V[]][];
 
@@ -8,7 +8,7 @@ export type FlowCache = {
   session: object;
 };
 
-export default class GateKeeper<K extends string, V extends K> {
+export class GateKeeper<K extends string, V extends K> {
   private store: GateFlowStore; 
   private schema: FlowSchema<K, V>
   public key: string;
