@@ -2,8 +2,8 @@
   "name": "gateflow",
   "version": "1.0.1",
   "description": "",
-  "main": "index.js",
-  "types": "./lib/index.d.ts",
+  "main": "/dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
   "scripts": {
     "test": "mocha -r ts-node/register ./test/**.spec.ts",
     "build": "./node_modules/.bin/tsc",

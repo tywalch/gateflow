@@ -1,2 +1,2 @@
-export * as GateFlow from './src/gateflow';
-export * as GateFlowStore from './src/gateflowstore';
+export * from './src/gateflow';
+export * from './src/gateflowstore';
