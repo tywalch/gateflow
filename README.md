@@ -1,6 +1,6 @@
 # GateFlow
 
-![GateFlow](https://github.com/tywalch/gateflow/blob/master/assets/gateflow.png?raw=true)
+![GateFlow](https://github.com/tywalch/gateflow/blob/main/assets/gateflow.png?raw=true)
 
 ***GateFlow*** is a light weight library to manage state and enforce order for flows that span multiple multi-requests.
 
