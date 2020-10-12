@@ -25,9 +25,9 @@ import  redis  from  "redis";
 
 Create a random `secret` for keys, and a `ttl` that represents how long a flow should be active for before it expires (in seconds.)
 ```typescript
-const  client  =  redis.createClient({ /* your configuration */ });
-const  secret  =  process.env.YOUR_SESSION_SECRET;
-const  ttl  =  300  // seconds
+const client = redis.createClient({ /* your configuration */ });
+const secret = "your_random_secret";
+const ttl = 300; // seconds
 
 const  store  =  new  GateFlowStore(client,  secret,  ttl);
 ```
@@ -39,19 +39,17 @@ const  store  =  new  GateFlowStore(client,  secret,  ttl);
 Add the schema either inline or by using the static method `buildSchema()`. 
 ```typescript
 const gateFlow = new GateFlow(store, [
-	["login",  ["login"]],
-	["send_mfa",  ["login",  "send_mfa"]],
-	["verify_mfa",  ["login",  "send_mfa",  "verify_mfa"]],
-	["complete_mfa",  ["login",  "send_mfa",  "verify_mfa",  "complete_mfa"]],
+	["login", ["login"]],
+	["send_mfa", ["login",  "send_mfa"]],
+	["verify_mfa", ["login",  "send_mfa",  "verify_mfa"]],
 ]);
 ```
 
 ```typescript
 const schema = GateFlow.buildSchema([
-	["login",  ["login"]],
-	["send_mfa",  ["login",  "send_mfa"]],
-	["verify_mfa",  ["login",  "send_mfa",  "verify_mfa"]],
-	["complete_mfa",  ["login",  "send_mfa",  "verify_mfa",  "complete_mfa"]],
+	["login", ["login"]],
+	["send_mfa", ["login",  "send_mfa"]],
+	["verify_mfa", ["login",  "send_mfa",  "verify_mfa"]],
 ]);
 const  gateFlow = new GateFlow(store, schema);
 ```
