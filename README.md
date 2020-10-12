@@ -17,8 +17,8 @@ GateFlow and GateFlowStore works out of the box with redis, but will work with s
 ### Import
 
 ```typescript
-import {GateFlow,  GateFlowStore} from  "gateflow";
-import  redis  from  "redis";
+import {GateFlow, GateFlowStore} from  "gateflow";
+import redis from "redis";
 ```
 
 ### Configure GateFlowStore
