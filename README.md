@@ -17,7 +17,7 @@ GateFlow and GateFlowStore works out of the box with redis, but will work with s
 ### Import
 
 ```typescript
-import {GateFlow, GateFlowStore} from  "gateflow";
+import {GateFlow, GateFlowStore} from "gateflow";
 import redis from "redis";
 ```
 
@@ -29,7 +29,7 @@ const client = redis.createClient({ /* your configuration */ });
 const secret = "your_random_secret";
 const ttl = 300; // seconds
 
-const  store  =  new  GateFlowStore(client,  secret,  ttl);
+const store = new GateFlowStore(client, secret, ttl);
 ```
 
 ### Configure GateFlow Service
@@ -48,10 +48,10 @@ const gateFlow = new GateFlow(store, [
 ```typescript
 const schema = GateFlow.buildSchema([
 	["login", ["login"]],
-	["send_mfa", ["login",  "send_mfa"]],
-	["verify_mfa", ["login",  "send_mfa",  "verify_mfa"]],
+	["send_mfa", ["login", "send_mfa"]],
+	["verify_mfa", ["login", "send_mfa", "verify_mfa"]],
 ]);
-const  gateFlow = new GateFlow(store, schema);
+const gateFlow = new GateFlow(store, schema);
 ```
 
 ### Schema
@@ -61,8 +61,8 @@ Building a schema for your flow requires planning which routes should be accessi
 ```json
 [
 	["login", ["login"]],
-	["send_mfa", ["login",  "send_mfa"]],
-	["verify_mfa", ["login",  "send_mfa",  "verify_mfa"]],
+	["send_mfa", ["login", "send_mfa"]],
+	["verify_mfa", ["login", "send_mfa", "verify_mfa"]],
 ]
 ```
 
@@ -102,12 +102,12 @@ After validating the user's credentials, we collect the available destinations f
 async function(req, res, next) {
 	let token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
 	let destinations = [{
-			type: "phone",
-			value: "(503) 555-7392"
-		}, {
-			type: "email",
-			value: "gateflow@tinkertamper.com"
-		}];
+		type: "phone",
+		value: "(503) 555-7392"
+	},{
+		type: "email",
+		value: "gateflow@tinkertamper.com"
+	}];
 	
 	let gatekeeper = await gateFlow.create({token, destinations});
 	await gatekeeper.next();
