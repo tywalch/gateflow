@@ -42,7 +42,7 @@ export class Encrypter {
     let results = decipher.update(encrypted, "hex", "utf8") + decipher.final("utf8");
     return results;
     } catch(err) {
-      if (err.message === "Invalid IV length") {
+      if (err instanceof Error && err.message === "Invalid IV length") {
         err.message = "Invalid key"
       }
       throw err;

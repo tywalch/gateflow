@@ -1,14 +1,8 @@
+.idea
+.nyc_output
 coverage/
-.vs/
-bower_components/
+dist
 node_modules/
-lib/
 *.js
 !_*.js
-.nyc_output
-typings
-
-# ignore .js.map files
 *.js.map
-*.js
-dist

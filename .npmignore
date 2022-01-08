@@ -1,12 +1,14 @@
-node_modules/
 *.log
 *.tgz
 
+.idea/
+.nyc_output/
+assets/
+coverage/
+node_modules/
 src/
 test/
-gulpfile.js
-tsconfig.json
-tslint.json
-typings.json
-typings
+.gitignore
+.nycrc
+.travis.yml
 dist/test

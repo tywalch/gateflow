@@ -1,10 +1,22 @@
 import { expect } from 'chai';
-import redis from "redis";
 import RedisClientMock from "./mock/redis";
 import {GateFlowStore} from "../src/gateflowstore";
 import {GateFlow} from "../src/gateflow";
 const client = new RedisClientMock();
-const store = new GateFlowStore(client, "apples", 99999999);
+
+type TestData = {
+    registration: boolean;
+    newProperty?: {
+        name: string;
+    };
+    secondProperty?: {
+        name2: string;
+    };
+}
+
+const store = new GateFlowStore<TestData>(client, "apples", 99999999);
+
+
 const schema = GateFlow.buildSchema([
     ["register", ["register"]],
     ["mfasend", ["register", "mfasend", "mfaverify"]],
@@ -30,7 +42,7 @@ describe("Gate Flow", async () => {
       });
 
       it("Should have a key when continued", async () => {
-          let {key} = await gateFlow.create();
+          let { key } = await gateFlow.create({registration: false});
           let gatekeeper = await gateFlow.continue(key);
           expect(gatekeeper.key).to.be.string;
           expect(gatekeeper.key).to.equal(key);
@@ -38,7 +50,7 @@ describe("Gate Flow", async () => {
 
       it("Should start with the active gate being the first in the flow", async () => {
           let secondGate = schema[0][0];
-          let gatekeeper = await gateFlow.create(); 
+          let gatekeeper = await gateFlow.create({registration: true});
           let activeGate = await gatekeeper.getActiveGate();
           expect(activeGate).to.be.string;
           expect(activeGate).to.be.equal(secondGate)
@@ -48,6 +60,7 @@ describe("Gate Flow", async () => {
           let initialData = {registration: true};
           let gatekeeper = await gateFlow.create(initialData); 
           let data = await gatekeeper.getData();
+          expect(data.registration).to.be.true;
           expect(data).to.be.deep.equal(initialData);
       });
   })
@@ -99,7 +112,7 @@ describe("Gate Flow", async () => {
             }
         ]
 
-        let gatekeeper = await gateFlow.create(); 
+        let gatekeeper = await gateFlow.create({registration: true});
         await gatekeeper.next();
         
         for (let test of tests) {
@@ -136,7 +149,7 @@ describe("Gate Flow", async () => {
               }
           ]
 
-          let gatekeeper = await gateFlow.create(); 
+          let gatekeeper = await gateFlow.create({registration: false});
           await gatekeeper.next();
           let gateKeeperTwo = await gateFlow.continue(gatekeeper.key);
 
@@ -147,7 +160,7 @@ describe("Gate Flow", async () => {
                 expect(test.throw).to.be.false;
                 expect(results[0]).to.be.false;
                 expect(results[1]).to.deep.equal([test.output])
-              } catch(err) {
+              } catch(err: any) {
                 expect(err.message).to.equal(test.output)
               }
           }
@@ -176,7 +189,7 @@ describe("Gate Flow", async () => {
 
       it("Should progress in the flow when gate is called", async () => {
           const secondGate = "mfasend";
-          let gateOne = await gateFlow.create(); 
+          let gateOne = await gateFlow.create({registration: true});
           let [isComplete] = await gateOne.next();
           expect(isComplete).to.be.false;
 
@@ -193,38 +206,7 @@ describe("Gate Flow", async () => {
           expect(lastGateName).to.equal(schema[schema.length - 1][0])
           
           // start gate 1
-          let gateOne = await gateFlow.create();
-          let key = gateOne.key;
-          await gateOne.next();
-
-          // start gate 2
-          let gateTwo = await gateFlow.continue(key);
-          await gateTwo.knock(secondGateName);
-          let [isComplete, errors] = await gateTwo.next();
-          expect(isComplete).to.be.false;
-
-          // start gate 3
-          let gateThree = await gateFlow.continue(key);
-          await gateThree.knock(thirdGateName);
-          let activeGate = await gateThree.getActiveGate();
-          expect(activeGate).to.be.equal(thirdGateName);
-          await gateThree.next();
-
-          // gate to gate 4
-          let lastGate = await gateFlow.continue(key);
-          await lastGate.knock(lastGateName);
-          let lastGateActiveGate = await lastGate.getActiveGate();
-          expect(lastGateActiveGate).to.be.equal(lastGateName);
-          let [lastGateIsComplete, session] = await lastGate.next();
-          expect(lastGateIsComplete).to.be.true;
-      });
-
-      it("Should regress in the flow when prior valid gate is called", async () => {
-          const secondGateName = "mfasend";
-          const thirdGateName = "mfaverify";
-          
-          // start gate 1
-          let gateOne = await gateFlow.create();
+          let gateOne = await gateFlow.create({registration: false});
           let key = gateOne.key;
           await gateOne.next();
 
@@ -239,12 +221,48 @@ describe("Gate Flow", async () => {
           await gateThree.knock(thirdGateName);
           let activeGate = await gateThree.getActiveGate();
           expect(activeGate).to.be.equal(thirdGateName);
+          await gateThree.next();
+
+          // gate to gate 4
+          let lastGate = await gateFlow.continue(key);
+          await lastGate.knock(lastGateName);
+          let lastGateActiveGate = await lastGate.getActiveGate();
+          expect(lastGateActiveGate).to.be.equal(lastGateName);
+          let [lastGateIsComplete] = await lastGate.next();
+          expect(lastGateIsComplete).to.be.true;
+      });
+
+      it("Should regress in the flow when prior valid gate is called", async () => {
+          const secondGateName = "mfasend";
+          const thirdGateName = "mfaverify";
+          
+          // start gate 1
+          let gateOne = await gateFlow.create({registration: true});
+          let key = gateOne.key;
+          await gateOne.next();
+
+          // start gate 2
+          let gateTwo = await gateFlow.continue(key);
+          await gateTwo.knock(secondGateName);
+          let [isComplete, session] = await gateTwo.next();
+          expect(isComplete).to.be.false;
+          expect(session.registration).to.be.true;
+
+          // start gate 3
+          let gateThree = await gateFlow.continue(key);
+          await gateThree.knock(thirdGateName);
+          let activeGate = await gateThree.getActiveGate();
+          expect(activeGate).to.be.equal(thirdGateName);
 
           // regress back to gate 2
           let regression = await gateFlow.continue(key);
           await regression.knock(secondGateName);
           let regressedActiveGate = await regression.getActiveGate();
           expect(regressedActiveGate).to.be.equal(secondGateName);
+          await regression.setData('registration', false);
+          const {registration, newProperty} = await regression.getData();
+          expect(registration).to.be.false;
+          expect(newProperty).to.be.undefined;
       });
 
       it("Should not allow going to gates that specified in the schema", async () => {
@@ -253,20 +271,27 @@ describe("Gate Flow", async () => {
           let firstGateName = firstGates[0];
           const lastGateName = "complete";
           expect(firstGates[1]).to.not.include.members([lastGateName]);
-          let gateOne = await gateFlow.create();
+          let gateOne = await gateFlow.create({
+              registration: true,
+              newProperty: {
+                  name: "tyler"
+              }
+          });
           let gateOneActiveGate = await gateOne.getActiveGate();
           expect(gateOneActiveGate).to.be.equal(firstGateName);
           let [isValid, errors] = await gateOne.test(lastGateName);
           expect(isValid).to.be.false;
           expect(errors).to.deep.equal([expectedErrorText]);
-          let error = null;
+          let error: Error | undefined = undefined;
           try {
               await gateOne.knock(lastGateName);
           } catch(err) {
-              error = err;
+              if (err instanceof Error) {
+                  error = err;
+              }
           }
           expect(error).to.not.be.null;
-          expect(error.message).to.equal(expectedErrorText);
+          expect(error?.message).to.equal(expectedErrorText);
       })
-  })
+  });
 });

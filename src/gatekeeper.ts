@@ -1,25 +1,25 @@
-import {GateFlowStore} from "./gateflowstore";
+import { GateFlowStore, StoreData, StoreKeys, StoreRecord } from "./gateflowstore";
 
 export type FlowSchema<K extends string, V extends K> = [K, V[]][];
 
-export type FlowCache = {
+export type FlowCache<D extends StoreRecord<any>> = {
   schema: string;
   activeGateIndex: number;
-  session: object;
+  session: D;
 };
 
-export class GateKeeper<K extends string, V extends K> {
-  private store: GateFlowStore; 
+export class GateKeeper<K extends string, V extends K, S extends GateFlowStore<any>, D extends StoreData<S>> {
+  private store: S;
   private schema: FlowSchema<K, V>
   public key: string;
 
-  constructor(key: string, schema: FlowSchema<K, V>, store: GateFlowStore) {
+  constructor(key: string, schema: FlowSchema<K, V>, store: S) {
     this.key = key;
     this.schema = schema;
     this.store = store;
   }
 
-  async next<T>(): Promise<[boolean, object]> {
+  async next(): Promise<[boolean, D]> {
     let cache = await this.getCache();
     let gateIndex = cache.activeGateIndex + 1;
     let hasCompleted = gateIndex === this.schema.length;
@@ -35,12 +35,12 @@ export class GateKeeper<K extends string, V extends K> {
     await this.store.destroy(this.key);
   }
 
-  async getData(): Promise<object> {
+  async getData(): Promise<D> {
     let cache = await this.getCache();
     return cache.session;
   }
 
-  async setData(property: string, data: object): Promise<object> {
+  async setData<K extends StoreKeys<D>>(property: K, data: D[K]): Promise<D> {
     let cache = await this.getCache();
     cache.session = Object.assign({}, cache.session, {[property]: data});
     await this.setCache(cache);
@@ -67,7 +67,7 @@ export class GateKeeper<K extends string, V extends K> {
     return this.schema[cache.activeGateIndex][0];
   }
 
-  private async getTest(gate: V): Promise<[boolean, string[], FlowCache]> {
+  private async getTest(gate: V): Promise<[boolean, string[], FlowCache<D>]> {
     if (typeof gate !== "string" || gate.length === 0) {
       throw new Error("Gate was not defined");
     }
@@ -83,7 +83,7 @@ export class GateKeeper<K extends string, V extends K> {
     return [errors.length === 0, errors, cache]
   }
 
-  private async setGate(gateIndex: number, cache: FlowCache) {
+  private async setGate(gateIndex: number, cache: FlowCache<D>) {
     return this.setCache({
       ...cache,
       activeGateIndex: gateIndex
@@ -103,11 +103,11 @@ export class GateKeeper<K extends string, V extends K> {
     return validGates[1].indexOf(gate) !== -1;
   }
 
-  private async setCache(cache: FlowCache) {
+  private async setCache(cache: FlowCache<D>) {
     return this.store.set(this.key, cache);
   }
 
-  private async getCache(): Promise<FlowCache> {
+  private async getCache(): Promise<FlowCache<D>> {
     return this.store.get(this.key);
   }
 }
