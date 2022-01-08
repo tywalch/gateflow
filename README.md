@@ -32,6 +32,42 @@ const ttl = 300; // seconds
 const store = new GateFlowStore(client, secret, ttl);
 ```
 
+For testing purposes you can a local storage implementation to follow along.
+
+> Note: Local storage is not recommend for *not for production use*.
+
+```typescript
+import { Store } from 'gateflow';
+
+class LocalStore implements Store {
+  private values: Record<string, string> = {};
+
+  del(key: string, cb: Callback<number> = () => undefined): boolean {
+    delete this.values[key];
+    cb(null, 1);
+    return true;
+  }
+
+  get(key: string, cb: Callback<string | null> = () => undefined): boolean {
+    const value = this.values[key];
+    if (value !== undefined) {
+      cb(null, value);
+    } else {
+      cb(null, null);
+    }
+    return true;
+  }
+
+  set(key: string, value: string, mode: string, duration: number, cb: Callback<"OK" | undefined> = () => undefined): boolean {
+    this.values[key] = value;
+    cb(null, 'OK');
+    return true;
+  }
+
+  quit() {}
+}
+```
+
 ### Configure GateFlow Service
 
 `GateFlow` takes an instance of `GateFlowStore`, and a [Schema](#schema) and returns a service for creating and managing flows.

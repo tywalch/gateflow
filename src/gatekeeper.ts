@@ -19,6 +19,9 @@ export class GateKeeper<K extends string, V extends K, S extends GateFlowStore<a
     this.store = store;
   }
 
+  /**
+   * Proceed to the next stage in schema
+   */
   async next(): Promise<[boolean, D]> {
     let cache = await this.getCache();
     let gateIndex = cache.activeGateIndex + 1;
@@ -31,15 +34,24 @@ export class GateKeeper<K extends string, V extends K, S extends GateFlowStore<a
     return [hasCompleted, cache.session]
   }
 
+  /**
+   * Destroy flow session from store
+   */
   async destroy(): Promise<void> {
     await this.store.destroy(this.key);
   }
 
+  /**
+   * Retrieve flow session data from store
+   */
   async getData(): Promise<D> {
     let cache = await this.getCache();
     return cache.session;
   }
 
+  /**
+   * Set value on flow session
+   */
   async setData<K extends StoreKeys<D>>(property: K, data: D[K]): Promise<D> {
     let cache = await this.getCache();
     cache.session = Object.assign({}, cache.session, {[property]: data});
@@ -47,6 +59,9 @@ export class GateKeeper<K extends string, V extends K, S extends GateFlowStore<a
     return data;
   }
 
+  /**
+   * Go to specific valid gate
+   */
   async knock(gate: V): Promise<V> {
     let [isValid, errors, cache] = await this.getTest(gate);
     if (!isValid) {
@@ -57,11 +72,17 @@ export class GateKeeper<K extends string, V extends K, S extends GateFlowStore<a
     return gate;
   }
 
+  /**
+   * Safely test if gate name is valid for current flow state
+   */
   async test(gate: V): Promise<[boolean, string[], object]> {
     let [isValid, errors, cache] = await this.getTest(gate);
     return [isValid, errors, cache.session];
   }
 
+  /**
+   * Returns the name of the current active gate name
+   */
   async getActiveGate() {
     let cache = await this.getCache();
     return this.schema[cache.activeGateIndex][0];
