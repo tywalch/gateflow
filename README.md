@@ -34,7 +34,7 @@ const store = new GateFlowStore(client, secret, ttl);
 
 For testing purposes you can a local storage implementation to follow along.
 
-> Note: Local storage is not recommend for *not for production use*.
+> Note: Local storage is _*not*_ recommend for production use.
 
 ```typescript
 import { Store } from 'gateflow';
