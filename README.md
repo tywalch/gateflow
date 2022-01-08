@@ -1,5 +1,5 @@
 # GateFlow
-[![Coverage Status](https://coveralls.io/repos/github/tywalch/gateflow/badge.svg?branch=main)](https://coveralls.io/github/tywalch/gateflow?branch=main)
+[![Coverage Status](https://coveralls.io/repos/github/tywalch/gateflow/badge.svg?branch=main)](https://coveralls.io/github/tywalch/gateflow?branch=main) ![npm bundle size](https://img.shields.io/bundlephobia/min/gateflow) ![Travis (.org)](https://img.shields.io/travis/tywalch/gateflow)
 ![GateFlow](https://github.com/tywalch/gateflow/blob/main/assets/gateflow.png?raw=true)
 
 ***GateFlow*** is a light weight library to manage state and enforce order for flows that span multiple multi-requests.  
@@ -17,19 +17,19 @@ GateFlow and GateFlowStore works out of the box with redis, but will work with s
 ### Import
 
 ```typescript
-import {GateFlow,  GateFlowStore} from  "gateflow";
-import  redis  from  "redis";
+import {GateFlow, GateFlowStore} from "gateflow";
+import redis from "redis";
 ```
 
 ### Configure GateFlowStore
 
 Create a random `secret` for keys, and a `ttl` that represents how long a flow should be active for before it expires (in seconds.)
 ```typescript
-const  client  =  redis.createClient({ /* your configuration */ });
-const  secret  =  process.env.YOUR_SESSION_SECRET;
-const  ttl  =  300  // seconds
+const client = redis.createClient({ /* your configuration */ });
+const secret = "your_random_secret";
+const ttl = 300; // seconds
 
-const  store  =  new  GateFlowStore(client,  secret,  ttl);
+const store = new GateFlowStore(client, secret, ttl);
 ```
 
 ### Configure GateFlow Service
@@ -39,21 +39,19 @@ const  store  =  new  GateFlowStore(client,  secret,  ttl);
 Add the schema either inline or by using the static method `buildSchema()`. 
 ```typescript
 const gateFlow = new GateFlow(store, [
-	["login",  ["login"]],
-	["send_mfa",  ["login",  "send_mfa"]],
-	["verify_mfa",  ["login",  "send_mfa",  "verify_mfa"]],
-	["complete_mfa",  ["login",  "send_mfa",  "verify_mfa",  "complete_mfa"]],
+	["login", ["login"]],
+	["send_mfa", ["login",  "send_mfa"]],
+	["verify_mfa", ["login",  "send_mfa",  "verify_mfa"]],
 ]);
 ```
 
 ```typescript
 const schema = GateFlow.buildSchema([
-	["login",  ["login"]],
-	["send_mfa",  ["login",  "send_mfa"]],
-	["verify_mfa",  ["login",  "send_mfa",  "verify_mfa"]],
-	["complete_mfa",  ["login",  "send_mfa",  "verify_mfa",  "complete_mfa"]],
+	["login", ["login"]],
+	["send_mfa", ["login", "send_mfa"]],
+	["verify_mfa", ["login", "send_mfa", "verify_mfa"]],
 ]);
-const  gateFlow = new GateFlow(store, schema);
+const gateFlow = new GateFlow(store, schema);
 ```
 
 ### Schema
@@ -63,8 +61,8 @@ Building a schema for your flow requires planning which routes should be accessi
 ```json
 [
 	["login", ["login"]],
-	["send_mfa", ["login",  "send_mfa"]],
-	["verify_mfa", ["login",  "send_mfa",  "verify_mfa"]],
+	["send_mfa", ["login", "send_mfa"]],
+	["verify_mfa", ["login", "send_mfa", "verify_mfa"]],
 ]
 ```
 
@@ -104,12 +102,12 @@ After validating the user's credentials, we collect the available destinations f
 async function(req, res, next) {
 	let token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
 	let destinations = [{
-			type: "phone",
-			value: "(503) 555-7392"
-		}, {
-			type: "email",
-			value: "gateflow@tinkertamper.com"
-		}];
+		type: "phone",
+		value: "(503) 555-7392"
+	},{
+		type: "email",
+		value: "gateflow@tinkertamper.com"
+	}];
 	
 	let gatekeeper = await gateFlow.create({token, destinations});
 	await gatekeeper.next();
